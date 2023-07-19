@@ -148,8 +148,8 @@ void writeBMP(const std::string& filename) {
 //Funciones de renderizado
 
 void DrawLine(std::vector<float>& crd, std::vector<float>& crd1, int thickness) {
-    int dx = abs(crd[0] - crd1[0]);
-    int dy = abs(crd[1] - crd1[1]);
+    float dx = abs(crd[0] - crd1[0]);
+    float dy = abs(crd[1] - crd1[1]);
     float pivot = 0;
     float tolerance = 0.5;
     // determinar si es muy empinada
@@ -167,11 +167,14 @@ void DrawLine(std::vector<float>& crd, std::vector<float>& crd1, int thickness) 
     // determinar si es vertical (evitar división entre 0)
     if (dx == 0) {
         int fixed = crd[0];
-        for (int i = crd[1]; i <= crd[1]; i++) {
+        for (int i = crd[1]; i <= crd1[1]; i++) {
             int index = getPixelIndex(fixed, i);
-            imageBMP.imageData[index].red = currentColor.red;
-            imageBMP.imageData[index].green = currentColor.green;
-            imageBMP.imageData[index].blue = currentColor.blue;
+            if (index > 0) {
+                imageBMP.imageData[index].red = currentColor.red;
+                imageBMP.imageData[index].green = currentColor.green;
+                imageBMP.imageData[index].blue = currentColor.blue;
+            }
+            
         }
     }
     else {
@@ -187,7 +190,7 @@ void DrawLine(std::vector<float>& crd, std::vector<float>& crd1, int thickness) 
                 imageBMP.imageData[index].blue = currentColor.blue;
             }
             else {
-                int index = getPixelIndex(i, y);
+                 int index = getPixelIndex(i, y);
                 imageBMP.imageData[index].red = currentColor.red;
                 imageBMP.imageData[index].green = currentColor.green;
                 imageBMP.imageData[index].blue = currentColor.blue;
@@ -225,15 +228,6 @@ void DrawPoligon(vector<vector<float>>& vertices, int thickness = 1) {
     }
 
     std::vector<std::vector<float>> combined = vertices;
-
-    // Ordenar los puntos en función de su valor x y y (si tienen el mismo valor x)
-    std::sort(combined.begin(), combined.end(), [](const std::vector<float>& a, const std::vector<float>& b) {
-        if (a[0] != b[0]) {
-            return a[0] < b[0];
-        }
-        return a[1] < b[1];
-        });
-
     // Combina el último punto con el primer punto
     std::vector<float> lastPoint = combined.back();
     std::vector<float> firstPoint = combined.front();
@@ -326,7 +320,7 @@ void Assemble(vector<vector<float>>& vertices, int thickness = 1, char PRIMTYPE 
     switch (PRIMTYPE)
     {
     case 't':
-        for (int vtx = 0; vtx < vertices.size(); vtx += 3) {
+        for (int vtx = 0; vtx < vertices.size() ; vtx += 3) {
             vector<vector<float>> triangle = { {vertices[vtx], vertices[vtx + 1], vertices[vtx + 2]} };
             DrawPoligon(triangle, thickness);
         };
@@ -343,7 +337,10 @@ void Load3DObjects(const std::string& filename, const std::vector<float>& transf
     objects.push_back(ObjParser(filename, transformobj, scaleobj, rotationobj));
 };
 
-std::vector<std::vector<float> > Generate3DObjectMatrix(const std::vector<float>& transformobj = { 0,0,0 }, const std::vector<float>& scaleobj = { 1,1,1 }) {
+std::vector<std::vector<float> > Generate3DObjectMatrix(const std::vector<float>& transformobj = { 0,0,0 }, const std::vector<float>& scaleobj = { 1,1,1 }, const std::vector<float>& rotationobj = { 0,0,0 }) {
+    std::vector<std::vector<float> > Rx = { { 1,0,0,0 }, { 0,cos(rotationobj[0]),-sin(rotationobj[0]),0 }, { 0,sin(rotationobj[0]),cos(rotationobj[0]),0 }, { 0,0,0,1 } };
+    std::vector<std::vector<float> > Ry = { { cos(rotationobj[1]),0,sin(rotationobj[1]),0 }, { 0,1,0,0 }, { -sin(rotationobj[1]),0,cos(rotationobj[1]),0 }, { 0,0,0,1 } };
+    std::vector<std::vector<float> > Rz = { { cos(rotationobj[2]),-sin(rotationobj[2]),0,0 }, { sin(rotationobj[2]),cos(rotationobj[2]),0,0 }, { 0,0,1,0 }, { 0,0,0,1 } };
     std::vector<std::vector<float> > Mt = { {1,0,0,transformobj[0]},
                                           {0,1,0,transformobj[1]},
                                           {0,0,1,transformobj[2]},
@@ -352,9 +349,10 @@ std::vector<std::vector<float> > Generate3DObjectMatrix(const std::vector<float>
                                           {0,scaleobj[1],0,0},
                                           {0,0,scaleobj[2],0},
                                           {0,0,0,1} };
-    return multiplyMatrices(Mt, Ms);
-
+    std::vector<std::vector<float> > Mr = multiplyMatrices(multiplyMatrices(Rx, Ry), Rz);
+    return multiplyMatrices(multiplyMatrices(Mt, Mr), Ms);
 };
+
 
 void Render3DObjects(char PRIMTYPE = 't') {
     for (int i = 0; i < objects.size(); i++) {

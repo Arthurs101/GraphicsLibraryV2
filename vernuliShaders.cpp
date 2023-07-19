@@ -12,9 +12,7 @@ std::vector<float> vertexShader(std::vector<float> vertex, std::vector<std::vect
         vt[i] = sum;
     }
 
-    vt[0] /= vt[3];
-    vt[1] /= vt[3];
-    vt[2] /= vt[3];
+ 
 
-    return vt;
+    return {vt[0]/vt[3],vt[1]/vt[3],vt[2]/vt[3]};
 }

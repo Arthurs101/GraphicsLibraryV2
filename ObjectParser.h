@@ -71,11 +71,6 @@ public:
         transform = std::move(transformobj);
         scale = std::move(scaleobj);
         rotation = std::move(rotationobj);
-        std::cout << "faces" << faces.size() << std::endl;
-        std::cout << "vertex" << vertices.size() << std::endl;
-
-
-
     }
     std::vector<std::vector<float>> vertices;
     std::vector<std::vector<float>> textcoords;
