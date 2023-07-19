@@ -30,11 +30,11 @@ struct ImageData {
 ImageData imageBMP;
 Pixel currentColor = { 255,255,255 };
 std::vector<ObjParser> objects = {};
-#pragma pack(push, 1);
 
 using namespace std;
 
 // Estructura que define la cabecera del archivo BMP
+#pragma pack(push, 1);
 struct BMPHeader {
     uint16_t signature;      // Firma del archivo BMP ('BM')
     uint32_t fileSize;       // Tamaño total del archivo
@@ -220,13 +220,13 @@ void DrawLine(const std::vector<float>& crd, const std::vector<float>& crd1, int
     DrawLine(temp1, temp2, thickness);
 }
 
-void DrawPoligon(vector<vector<float>>& vertices, int thickness = 1) {
+void DrawPoligon(vector<vector<float>>& vertices, int thickness = 1, bool fill = false, std::vector<int> fillColor = {0,0,0}) {
     // Verificar si hay al menos dos coordenadas para combinar
     if (vertices.size() < 2) {
         std::cout << "Se requieren al menos dos coordenadas para combinar." << std::endl;
         return;
-    }
-
+    };
+    setColor(fillColor[0], fillColor[1], fillColor[2]);
     std::vector<std::vector<float>> combined = vertices;
     // Combina el último punto con el primer punto
     std::vector<float> lastPoint = combined.back();
@@ -238,6 +238,50 @@ void DrawPoligon(vector<vector<float>>& vertices, int thickness = 1) {
         std::vector<float> currentPoint = combined[i];
         std::vector<float> nextPoint = combined[i + 1];
         DrawLine(currentPoint, nextPoint, thickness);
+    }
+    // Si se requiere rellenar el polígono, llama a la función setColor() y dibuja líneas horizontales desde el primer punto al último punto, y desde el último punto al primer punto.
+    if (fill) {
+        //obtener los limites x, y de los vertices que conforman el poligono
+        float minX = std::numeric_limits<float>::max();
+        float maxX = std::numeric_limits<float>::min();
+        for (const auto& vertex : vertices) {
+            minX = std::min(minX, vertex[0]);
+            maxX = std::max(maxX, vertex[0]);
+        }
+             
+        float minY = std::numeric_limits<float>::max();
+        float maxY = std::numeric_limits<float>::min();
+        for (const auto& vertex : vertices) {
+            minY = std::min(minY, vertex[1]);
+            maxY = std::max(maxY, vertex[1]);
+        }
+        
+        int vertexS = vertices.size();
+        
+        for (float y = minY; y  <= maxY; y++) {
+            std::vector<float> intersecciones = {};
+            //calcular las intersecciones de los vertices
+            for (int i = 0; i < vertexS; i++) {
+                int k = (i + 1) % vertexS;
+                std::vector<float> V0 = vertices[i];
+                std::vector<float> V1 = vertices[k];
+                //verificar alguna interseccion del vertice con la fila Y actual
+                if(V0[1] < y and V1[1] >= y or V1[1] < y and V0[1] >= y){
+                    float iP = V0[0] + (y - V0[1]) / (V1[1] - V0[1]) * (V1[0] - V0[0]);
+                    intersecciones.push_back(iP);
+                }
+            }
+            //ordenar las intersecciones
+            std::sort(intersecciones.begin(), intersecciones.end());
+            //pintar cada interseccion 
+            for (int i = 0; i < intersecciones.size(); i += 2) {
+                float x0 = intersecciones[i];
+                float x1 = std::min(intersecciones[i + 1], maxX);
+                for (int x = x0; x <= x1; x += 1) {
+                    setColorOnPixel(x, y, currentColor);
+                }
+            }
+        }
     }
 }
 
@@ -352,7 +396,6 @@ std::vector<std::vector<float> > Generate3DObjectMatrix(const std::vector<float>
     std::vector<std::vector<float> > Mr = multiplyMatrices(multiplyMatrices(Rx, Ry), Rz);
     return multiplyMatrices(multiplyMatrices(Mt, Mr), Ms);
 };
-
 
 void Render3DObjects(char PRIMTYPE = 't') {
     for (int i = 0; i < objects.size(); i++) {
