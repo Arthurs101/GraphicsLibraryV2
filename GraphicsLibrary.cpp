@@ -62,6 +62,6 @@ int main() {
     DrawPoligon(poligono3, 1, true, { 0,255,0 });
     DrawPoligon(poligono4 , 1, true, { 255,0,255 });
     DrawPoligon(poligono5, 1, true, { 0,0,0 });
-    writeBMP("poligons2.bmp");
+    writeBMP("poligons-lab.bmp");
     return 0;
 }
