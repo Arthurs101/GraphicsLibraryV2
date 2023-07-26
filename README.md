@@ -12,3 +12,5 @@ compilar el archivo GraphicsLibracry.cpp puesto que es el principal
   - header con la librería de operaciones matemáticas propia
 - ## ObjectParser.h
   - header con la clase que representa al .obj puesto que este extrae los datos 
+## Para este laboratorio 1:
+-poligons-lab.bmp es el archivo de salida para el laboratorio
