@@ -269,7 +269,8 @@ class vgImage {
                 case 't':
                     for (int vtx = 0; vtx < vertices.size(); vtx += 3) {
                         std::vector<std::vector<float>> triangle = { {vertices[vtx], vertices[vtx + 1], vertices[vtx + 2]} };
-                        vgCreatePoligon(triangle, false,Pixel(fragmentShader()));
+                        //vgCreatePoligon(triangle, false,Pixel(fragmentShader()));
+                        vgTriangle_bc(vertices[vtx], vertices[vtx + 1], vertices[vtx + 2]);
                     };
                     break;
 
@@ -294,6 +295,7 @@ class vgImage {
                 std::vector<std::vector<float> > tmp = multiplyMatrices(Mt, Mr);
                 return multiplyMatrices(tmp,Ms);
             };
+
             std::vector<std::vector<float> > Generate3DAnglesMatrix(float pitch , float yaw , float roll) {
                 pitch *= PI/180;
                 roll +=  PI / 180;
@@ -312,5 +314,58 @@ class vgImage {
                                                         { 0,0,0,1 } };
                 return multiplyMatrices(multiplyMatrices(Rx, Ry), Rz);
             }
+
+            // Función para calcular el área de un triángulo formado por tres puntos
+            float area(const std::vector<float>& A, const std::vector<float>& B, const std::vector<float>& C) {
+                return std::abs((A[0] * B[1] + B[0] * C[1] + C[0] * A[1]) - (A[1] * B[0] + B[1] * C[0] + C[1] * A[0])) / 2.0f;
+            }
+
+            // Función para verificar si un punto P está dentro de un triángulo ABC utilizando coordenadas baricéntricas
+            bool isInsideTriangle(const std::vector<float>& A, const std::vector<float>& B, const std::vector<float>& C, const std::vector<float>& P) {
+                float areaABC = area(A, B, C);
+                float areaPBC = area(P, B, C);
+                float areaAPC = area(A, P, C);
+                float areaABP = area(A, B, P);
+
+                // Calcular las coordenadas baricéntricas (u, v, w) del punto P
+                float u = areaPBC / areaABC;
+                float v = areaAPC / areaABC;
+                float w = areaABP / areaABC;
+
+                return (0 <= u && u <= 1 && 0 <= v && v <= 1 && 0 <= w && w <= 1);
+            }
+
+            // Función para pintar el triángulo utilizando colores dados para cada vértice
+            void vgTriangle_bc(std::vector<float> V0, std::vector<float> V1, std::vector<float> V2) {
+                int minX = std::round(std::min({ V0[0], V1[0], V2[0] }));
+                int maxX = std::round(std::max({ V0[0], V1[0], V2[0] }));
+                int minY = std::round(std::min({ V0[1], V1[1], V2[1] }));
+                int maxY = std::round(std::max({ V0[1], V1[1], V2[1] }));
+
+                std::vector<float> colorV0 = { 1.0f, 0.0f, 0.0f };
+                std::vector<float> colorV1 = { 0.0f, 1.0f, 0.0f };
+                std::vector<float> colorV2 = { 0.0f, 0.0f, 1.0f };
+
+                for (int y = minY; y <= maxY; ++y) {
+                    for (int x = minX; x <= maxX; ++x) {
+                        std::vector<float> P = { static_cast<float>(x), static_cast<float>(y) };
+                        if (isInsideTriangle(V0, V1, V2, P)) {
+                            // Pintar el pixel (x, y) con el color interpolado
+                            // en función de las coordenadas baricéntricas
+                            float u = area(P, V1, V2) / area(V0, V1, V2);
+                            float v = area(V0, P, V2) / area(V0, V1, V2);
+                            float w = area(V0, V1, P) / area(V0, V1, V2);
+
+                            std::vector<float> pixelColor(3);
+                            for (int i = 0; i < 3; ++i) {
+                                pixelColor[i] = u * colorV0[i] + v * colorV1[i] + w * colorV2[i];
+                            }
+                            vgPoint(x, y, { (unsigned char) pixelColor[0],(unsigned char) pixelColor[1],(unsigned char) pixelColor[2] });
+                        }
+                    }
+                }
+            }
+
+            
 
 };
