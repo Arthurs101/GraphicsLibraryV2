@@ -291,8 +291,8 @@ class vgImage {
                                                       {0,0,scaleobj[2],0},
                                                       {0,0,0,1} };
                 std::vector<std::vector<float> > Mr = Generate3DAnglesMatrix(rotationobj);
-                std::vector<std::vector<float> > tmp = multiplyMatrices(Mt, Mr);
-                return multiplyMatrices(tmp, Ms);
+                std::vector<std::vector<float> > tmp = multiplyMatrices(Mt, Ms);
+                return multiplyMatrices(tmp, Mr);
             };
             std::vector<std::vector<float> > Generate3DAnglesMatrix(const std::vector<float>& rotationobj = { 0,0,0 }) {
                 float pitch = rotationobj[0] + PI/180;
