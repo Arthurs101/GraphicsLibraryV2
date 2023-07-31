@@ -239,7 +239,7 @@ class vgImage {
 
         void Render3DObjects(char PRIMTYPE = 't') {
             for (int i = 0; i < objects.size(); i++) {
-                std::vector<std::vector<float> > M = Generate3DObjectMatrix(objects[i].transform, objects[i].scale);
+                std::vector<std::vector<float> > M = Generate3DObjectMatrix(objects[i].transform, objects[i].scale,objects[i].rotation);
                 std::vector<std::vector<float>> shaded_vertices = {};
                 int faces_ = objects[i].faces.size();
                 for (int face = 0; face < faces_; face++) {
@@ -290,14 +290,14 @@ class vgImage {
                                                       {0,scaleobj[1],0,0},
                                                       {0,0,scaleobj[2],0},
                                                       {0,0,0,1} };
-                std::vector<std::vector<float> > Mr = Generate3DAnglesMatrix(rotationobj);
-                std::vector<std::vector<float> > tmp = multiplyMatrices(Mt, Ms);
-                return multiplyMatrices(tmp, Mr);
+                std::vector<std::vector<float> > Mr = Generate3DAnglesMatrix(rotationobj[0], rotationobj[1], rotationobj[2]);
+                std::vector<std::vector<float> > tmp = multiplyMatrices(Mt, Mr);
+                return multiplyMatrices(tmp,Ms);
             };
-            std::vector<std::vector<float> > Generate3DAnglesMatrix(const std::vector<float>& rotationobj = { 0,0,0 }) {
-                float pitch = rotationobj[0] + PI/180;
-                float roll = rotationobj[1] + PI / 180;
-                float yawh = rotationobj[2] + PI / 180;
+            std::vector<std::vector<float> > Generate3DAnglesMatrix(float pitch , float yaw , float roll) {
+                pitch *= PI/180;
+                roll +=  PI / 180;
+                yaw += PI / 180;
                 std::vector<std::vector<float> > Rx = { { 1,0,0,0 }, 
                                                         { 0,(float)cos(pitch),(float)-sin(pitch),0}, 
                                                         {0,(float)sin(pitch),(float)cos(pitch),0}, 
@@ -306,8 +306,8 @@ class vgImage {
                                                       { 0        , 1, 0       , 0 },
                                                       { (float)-sin(roll), 0, (float)cos(roll), 0 },
                                                       { 0        , 0, 0       , 1 }};
-                std::vector<std::vector<float> > Rz = { { (float)cos(yawh),-(float)sin(yawh),0,0 }, 
-                                                        { (float)sin(yawh),(float)cos(yawh),0,0 },
+                std::vector<std::vector<float> > Rz = { { (float)cos(yaw),-(float)sin(yaw),0,0 }, 
+                                                        { (float)sin(yaw),(float)cos(yaw),0,0 },
                                                         { 0,0,1,0 }, 
                                                         { 0,0,0,1 } };
                 return multiplyMatrices(multiplyMatrices(Rx, Ry), Rz);
