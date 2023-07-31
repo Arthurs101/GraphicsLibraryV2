@@ -269,8 +269,8 @@ class vgImage {
                 case 't':
                     for (int vtx = 0; vtx < vertices.size(); vtx += 3) {
                         std::vector<std::vector<float>> triangle = { {vertices[vtx], vertices[vtx + 1], vertices[vtx + 2]} };
-                        //vgCreatePoligon(triangle, false,Pixel(fragmentShader()));
-                        vgTriangle_bc(vertices[vtx], vertices[vtx + 1], vertices[vtx + 2]);
+                        vgCreatePoligon(triangle, true ,Pixel(fragmentShader()));
+                        //vgTriangle_bc(vertices[vtx], vertices[vtx + 1], vertices[vtx + 2]);
                     };
                     break;
 
