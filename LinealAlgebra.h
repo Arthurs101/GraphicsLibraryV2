@@ -1,33 +1,55 @@
 #pragma once
 #include <vector>
+#include <iostream>
 // Multiplicar matrices
-std::vector<std::vector<float>> multiplyMatrices(const std::vector<std::vector<float>>& a, const std::vector<std::vector<float>>& b) {
-    int n = a.size();
-    int m = b[0].size();
-    int p = b.size();
+std::vector<std::vector<float>> multiplyMatrices(const std::vector<std::vector<float>>& matriz1, const std::vector<std::vector<float>>& matriz2) {
+    int filas_matriz1 = matriz1.size();
+    int columnas_matriz1 = matriz1[0].size();
+    int filas_matriz2 = matriz2.size();
+    int columnas_matriz2 = matriz2[0].size();
 
-    std::vector<std::vector<float>> c(n, std::vector<float>(m));
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < m; j++) {
-            for (int k = 0; k < p; k++) {
-                c[i][j] += a[i][k] * b[k][j];
+    // Verificar si las matrices se pueden multiplicar
+    if (columnas_matriz1 != filas_matriz2) {
+        std::cout << "No se pueden multiplicar las matrices." << std::endl;
+        return std::vector<std::vector<float>>();
+    }
+
+    // Crear una matriz de resultado con las dimensiones adecuadas
+    std::vector<std::vector<float>> matriz_resultado(filas_matriz1, std::vector<float>(columnas_matriz2, 0.0));
+
+    // Realizar la multiplicación de matrices
+    for (int i = 0; i < filas_matriz1; ++i) {
+        for (int j = 0; j < columnas_matriz2; ++j) {
+            for (int k = 0; k < columnas_matriz1; ++k) {
+                matriz_resultado[i][j] += matriz1[i][k] * matriz2[k][j];
             }
         }
     }
 
-    return c;
+    return matriz_resultado;
 }
 
 // Multiplicar matriz por vector
-std::vector<float> multiplyMatrixByVector(const std::vector<std::vector<float>>& a, const std::vector<float>& b) {
-    int n = a.size();
-    int m = b.size();
+std::vector<float> multiplyMatrixByVector(const std::vector<std::vector<float>>& matriz, const std::vector<float>& vector) {
+    int filas_matriz = matriz.size();
+    int columnas_matriz = matriz[0].size();
+    int filas_vector = vector.size();
 
-    std::vector<float> c(n);
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < m; j++) {
-            c[i] += a[i][j] * b[j];
+    // Verificar si las matrices se pueden multiplicar
+    if (columnas_matriz != filas_vector) {
+        std::cout << "No se puede multiplicar la matriz por el vector." << std::endl;
+        return std::vector<float>();
+    }
+
+    // Crear un vector de resultado con las dimensiones adecuadas
+    std::vector<float> vector_resultado(filas_matriz, 0.0);
+
+    // Realizar la multiplicación matriz-vector
+    for (int i = 0; i < filas_matriz; ++i) {
+        for (int k = 0; k < columnas_matriz; ++k) {
+            vector_resultado[i] += matriz[i][k] * vector[k];
         }
     }
-    return c;
+
+    return vector_resultado;
 }
