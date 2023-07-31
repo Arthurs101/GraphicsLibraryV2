@@ -269,8 +269,7 @@ class vgImage {
                 case 't':
                     for (int vtx = 0; vtx < vertices.size(); vtx += 3) {
                         std::vector<std::vector<float>> triangle = { {vertices[vtx], vertices[vtx + 1], vertices[vtx + 2]} };
-                        vgCreatePoligon(triangle, false ,Pixel(fragmentShader()));
-                        //vgTriangle_bc(vertices[vtx], vertices[vtx + 1], vertices[vtx + 2]);
+                        vgTriangle_bc(vertices[vtx], vertices[vtx + 1], vertices[vtx + 2]);
                     };
                     break;
 
@@ -317,7 +316,7 @@ class vgImage {
 
             // Función para calcular el área de un triángulo formado por tres puntos
             float area(const std::vector<float>& A, const std::vector<float>& B, const std::vector<float>& C) {
-                return std::abs((A[0] * B[1] + B[0] * C[1] + C[0] * A[1]) - (A[1] * B[0] + B[1] * C[0] + C[1] * A[0])) / 2.0f;
+                return (B[1] - C[1]) * (A[0] - C[0]) + (C[0] - B[0]) * (A[1] - C[1]);
             }
 
             // Función para verificar si un punto P está dentro de un triángulo ABC utilizando coordenadas baricéntricas
