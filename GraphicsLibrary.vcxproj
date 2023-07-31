@@ -130,6 +130,7 @@
   <ItemGroup>
     <ClCompile Include="GraphicsLibrary.cpp" />
     <ClCompile Include="vernuliGL.cpp" />
+    <ClCompile Include="VernuliGL2.0.cpp" />
     <ClCompile Include="vernuliShaders.cpp" />
   </ItemGroup>
   <ItemGroup>

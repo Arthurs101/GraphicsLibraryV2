@@ -7,12 +7,20 @@
 
 class ObjParser {
 public:
+    std::vector<std::vector<float>> vertices;
+    std::vector<std::vector<float>> textcoords;
+    std::vector<std::vector<float>> normals;
+    std::vector<std::vector<std::vector<float>>> faces;
+    std::vector<float> transform;
+    std::vector<float> scale;
+    std::vector<float> rotation;
+
+
     ObjParser(const std::string& filename, const std::vector<float>& transformobj, const std::vector<float>& scaleobj, const std::vector<float>& rotationobj) {
         std::ifstream file(filename);
         if (!file.is_open()) {
             throw std::runtime_error("Failed to open file");
         }
-
         std::string line;
         while (std::getline(file, line)) {
             std::istringstream iss(line);
@@ -72,11 +80,5 @@ public:
         scale = std::move(scaleobj);
         rotation = std::move(rotationobj);
     }
-    std::vector<std::vector<float>> vertices;
-    std::vector<std::vector<float>> textcoords;
-    std::vector<std::vector<float>> normals;
-    std::vector<std::vector<std::vector<float>>> faces;
-    std::vector<float> transform;
-    std::vector<float> scale;
-    std::vector<float> rotation;
+  
 };

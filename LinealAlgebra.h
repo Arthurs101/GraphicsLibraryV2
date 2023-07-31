@@ -29,6 +29,5 @@ std::vector<float> multiplyMatrixByVector(const std::vector<std::vector<float>>&
             c[i] += a[i][j] * b[j];
         }
     }
-
     return c;
 }
