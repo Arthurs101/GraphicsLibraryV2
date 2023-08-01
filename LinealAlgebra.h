@@ -1,4 +1,5 @@
 #pragma once
+#include <cmath>
 #include <vector>
 #include <iostream>
 // Multiplicar matrices
@@ -52,4 +53,26 @@ std::vector<float> multiplyMatrixByVector(const std::vector<std::vector<float>>&
     }
 
     return vector_resultado;
+}
+
+std::vector<float> barycentricCoords(const std::vector<float>& A, const std::vector<float>& B, const std::vector<float>& C, const std::vector<float>& P) {
+    float areaABC = abs((A[0] * B[1] + B[0] * C[1] + C[0] * A[1]) - (A[1] * B[0] + B[1] * C[0] + C[1] * A[0]));
+    if (areaABC == 0) {
+        return std::vector<float>{0, 0, 0};
+    }
+
+    float areaPCB = abs((P[0] * C[1] + C[0] * B[1] + B[0] * P[1]) - (P[1] * C[0] + C[1] * B[0] + B[1] * P[0]));
+    float areaACP = abs((A[0] * C[1] + C[0] * P[1] + P[0] * A[1]) - (A[1] * C[0] + C[1] * P[0] + P[1] * A[0]));
+    float areaABP = abs((A[0] * B[1] + B[0] * P[1] + P[0] * A[1]) - (A[1] * B[0] + B[1] * P[0] + P[1] * A[0]));
+
+    float u = areaPCB / areaABC;
+    float v = areaACP / areaABC;
+    float w = areaABP / areaABC;
+
+    if (0 <= u && u <= 1 && 0 <= v && v <= 1 && 0 <= w && w <= 1 && std::abs(u + v + w - 1.0) < 1e-6) {
+        return std::vector<float>{u, v, w};
+    }
+    else {
+        return std::vector<float>{0, 0, 0};
+    }
 }
