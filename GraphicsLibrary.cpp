@@ -3,12 +3,10 @@
 #include <iostream>
 int main() {
     // Crear una imagen de ejemplo
-    int width = 800; int height = 800;
+    int width = 6000; int height = 4000;
     vgImage Img(width, height);
-    //Img.vgLoad3dObject("ALLOSAUR.OBJ", { (float) width/2 , 0 ,0}, {800,800,800}, {0,0,45});
-    //Img.Render3DObjects();
-    Img.drawTriangle({0,0,0}, {799,0,0}, {400,799,0});
-    Img.vgCreatePoligon({ { 0,0,0 }, { 799,0,0 }, { 400,799,0 } }, false, {0,0,255});
+    Img.vgLoad3dObject("ALLOSAUR.OBJ", { (float) width/2 + 400 , 0 ,0}, {800,800,800}, {0,0,45});
+    Img.Render3DObjects();
     Img.vgWriteBMP("Baricentric-Test.bmp");
     return 0;
 }

@@ -32,9 +32,10 @@ struct Pixel {
 };
 struct Image {
     std::vector<std::vector<Pixel>> pixels;
+    std::vector<std::vector<float>> zbuffer;
     int width;
     int height;
-    Image(int w, int h) : pixels(w, std::vector<Pixel>(h, { 0, 0, 0 })), width(w), height(h) {}
+    Image(int w, int h) : pixels(w, std::vector<Pixel>(h, { 0, 0, 0 })),zbuffer(w, std::vector<float>(h, 1000)), width(w), height(h) {}
 };
 
 //constantes y variables globales
@@ -240,7 +241,7 @@ class vgImage {
             objects.push_back(ObjParser(filename, transformobj, scaleobj, rotationobj));
         }
 
-        void drawTriangle(const std::vector<float>& A, const std::vector<float>& B, const std::vector<float>& C, const Pixel& color = {255,255,255}) {
+        void CreateBCTriangle(const std::vector<float>& A, const std::vector<float>& B, const std::vector<float>& C, const Pixel& color = {255,255,255},bool multicolor = true) {
             
             int minX = std::round(std::min({ A[0], B[0], C[0] }));
             int maxX = std::round(std::max({ A[0], B[0], C[0] }));
@@ -261,14 +262,28 @@ class vgImage {
                         float u = baryCoords[0];
                         float v = baryCoords[1];
                         float w = baryCoords[2];
-
-                        // Calcular los valores de color del píxel mediante interpolación lineal
-                        /*unsigned char r = static_cast<unsigned char>(color.red * u + color.red * v + color.red * w);
-                        unsigned char g = static_cast<unsigned char>(color.green * u + color.green * v + color.green* w);
-                        unsigned char b = static_cast<unsigned char>(color.blue * u + color.blue * v + color.blue * w);*/
-                        
-                        // Asignar los valores de color al píxel en el array de pixeles
-                        vgPoint(x, y, { 255,0,0 });
+                        unsigned char r;
+                        unsigned char g ;
+                        unsigned char b ;
+                        float z = u * A[2] + v * B[2] + w * C[2];
+                        if (x < imgData.width && y < imgData.height && x >= 0 && y >= 0) {
+                            if (z < imgData.zbuffer[x][y]) {
+                                imgData.zbuffer[x][y] = z;
+                                // Calcular los valores de color del píxel mediante interpolación lineal
+                                if (multicolor) {
+                                    r = static_cast<unsigned char>(color.red * u);
+                                    g = static_cast<unsigned char>(color.green * v);
+                                    b = static_cast<unsigned char>(color.blue * w);
+                                }
+                                else {
+                                    r = color.red;
+                                    g = color.green;
+                                    b = color.blue;
+                                }
+                                // Asignar los valores de color al píxel en el array de pixeles
+                                vgPoint(x, y, { r,g,b });
+                            }
+                        }
                     }
                 }
             }
@@ -298,36 +313,7 @@ class vgImage {
                 Assemble(shaded_vertices);
             }
         }
-        // Función para pintar el triángulo utilizando colores dados para cada vértice
-        void vgTriangle_bc(std::vector<float> V0, std::vector<float> V1, std::vector<float> V2) {
-            int minX = std::round(std::min({ V0[0], V1[0], V2[0] }));
-            int maxX = std::round(std::max({ V0[0], V1[0], V2[0] }));
-            int minY = std::round(std::min({ V0[1], V1[1], V2[1] }));
-            int maxY = std::round(std::max({ V0[1], V1[1], V2[1] }));
-
-            std::vector<float> colorV0 = { 1.0f, 0.0f, 0.0f };
-            std::vector<float> colorV1 = { 0.0f, 1.0f, 0.0f };
-            std::vector<float> colorV2 = { 0.0f, 0.0f, 1.0f };
-
-            for (int y = minY; y <= maxY; ++y) {
-                for (int x = minX; x <= maxX; ++x) {
-                    std::vector<float> P = { static_cast<float>(x), static_cast<float>(y) };
-                    if (isInsideTriangle(V0, V1, V2, P)) {
-                        // Pintar el pixel (x, y) con el color interpolado
-                        // en función de las coordenadas baricéntricas
-                        float u = area(P, V1, V2) / area(V0, V1, V2);
-                        float v = area(V0, P, V2) / area(V0, V1, V2);
-                        float w = area(V0, V1, P) / area(V0, V1, V2);
-
-                        std::vector<float> pixelColor(3);
-                        for (int i = 0; i < 3; ++i) {
-                            pixelColor[i] = u * colorV0[i] + v * colorV1[i] + w * colorV2[i];
-                        }
-                        vgPoint(x, y, { (unsigned char)pixelColor[0],(unsigned char)pixelColor[1],(unsigned char)pixelColor[2] });
-                    }
-                }
-            }
-        }
+        
         
     private:
 
@@ -337,8 +323,7 @@ class vgImage {
                 case 't':
                     for (int vtx = 0; vtx < vertices.size(); vtx += 3) {
                         std::vector<std::vector<float>> triangle = { {vertices[vtx], vertices[vtx + 1], vertices[vtx + 2]} };
-                        //vgTriangle_bc(vertices[vtx], vertices[vtx + 1], vertices[vtx + 2]);
-                        vgCreatePoligon(triangle, false, fragmentShader());
+                        CreateBCTriangle(vertices[vtx], vertices[vtx + 1], vertices[vtx + 2]);                        
                     };
                     break;
 
@@ -382,29 +367,5 @@ class vgImage {
                                                         { 0,0,0,1 } };
                 return multiplyMatrices(multiplyMatrices(Rx, Ry), Rz);
             }
-
-            // Función para calcular el área de un triángulo formado por tres puntos
-            float area(const std::vector<float>& A, const std::vector<float>& B, const std::vector<float>& C) {
-                return (B[1] - C[1]) * (A[0] - C[0]) + (C[0] - B[0]) * (A[1] - C[1]);
-            }
-
-            // Función para verificar si un punto P está dentro de un triángulo ABC utilizando coordenadas baricéntricas
-            bool isInsideTriangle(const std::vector<float>& A, const std::vector<float>& B, const std::vector<float>& C, const std::vector<float>& P) {
-                    float areaABC = area(A, B, C);
-                    float areaPBC = area(P, B, C);
-                    float areaAPC = area(A, P, C);
-                    float areaABP = area(A, B, P);
-
-                    // Calcular las coordenadas baricéntricas (u, v, w) del punto P
-                    float u = areaPBC / areaABC;
-                    float v = areaAPC / areaABC;
-                    float w = areaABP / areaABC;
-
-                    return (0 <= u && u <= 1 && 0 <= v && v <= 1 && 0 <= w && w <= 1);
-                }
-
-            
-
-            
 
 };

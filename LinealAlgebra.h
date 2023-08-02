@@ -73,6 +73,6 @@ std::vector<float> barycentricCoords(const std::vector<float>& A, const std::vec
         return std::vector<float>{u, v, w};
     }
     else {
-        return std::vector<float>{0, 0, 0};
+        return std::vector<float>{-1, -1, -1};
     }
 }
