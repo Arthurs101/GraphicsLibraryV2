@@ -1,4 +1,4 @@
-#include "vernuliGL.cpp"
+#include "VernuliGL2.0.cpp"
 #include <vector>
 #include <iostream>
 int main() {
