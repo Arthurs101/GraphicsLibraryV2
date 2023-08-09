@@ -3,12 +3,10 @@
 #include <iostream>
 int main() {
     // Crear una imagen de ejemplo
-    int width = 1920;
-    int height = 1920;
-    generateBMP(width, height);
-    clearAllImage(0, 0, 0);
-    Load3DObjects("Bug.obj", { (float)width / 2,(float)height / 2,1 }, {800,800,1}, {0,0,0});
-    Render3DObjects();
-    writeBMP("Bug.bmp");
+    int width = 1920; int height = 1080;
+    vgImage Img(width, height);
+    Img.vgLoad3dObject("Bug.obj", { (float)width / 2  , (float)height/2-200 ,0 }, { 800,800,800 }, {0,0,90});
+    Img.Render3DObjects();
+    Img.vgWriteBMP("Output.bmp");
     return 0;
 }

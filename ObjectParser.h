@@ -4,10 +4,84 @@
 #include <sstream>
 #include <vector>
 #include <string>
+class Texture {
+private:
+    int width;
+    int height;
+    std::vector<std::vector<std::vector<float>>> pixels;
+    bool isValid; // Indica si la textura se cargó correctamente
+public:
+    Texture() : width(0), height(0), isValid(false) {}
 
+
+    Texture(const std::string& filename) {
+        std::ifstream image(filename, std::ios::binary);
+        if (!image) {
+            std::cerr << "Error: Unable to open file " << filename << std::endl;
+            return;
+        }
+
+        image.seekg(10);
+        int headerSize;
+        image.read(reinterpret_cast<char*>(&headerSize), 4);
+
+        image.seekg(18);
+        image.read(reinterpret_cast<char*>(&width), 4);
+        image.read(reinterpret_cast<char*>(&height), 4);
+
+        image.seekg(headerSize, std::ios::beg);
+        pixels.resize(height, std::vector<std::vector<float>>(width, std::vector<float>(3)));
+
+        for (int y = 0; y < height; ++y) {
+            for (int x = 0; x < width; ++x) {
+                unsigned char r, g, b;
+                image.read(reinterpret_cast<char*>(&b), 1);
+                image.read(reinterpret_cast<char*>(&g), 1);
+                image.read(reinterpret_cast<char*>(&r), 1);
+                pixels[y][x][0] = static_cast<float>(r) / 255.0f;
+                pixels[y][x][1] = static_cast<float>(g) / 255.0f;
+                pixels[y][x][2] = static_cast<float>(b) / 255.0f;
+            }
+        }
+    }
+    std::vector<float> getColor(float u, float v) {
+        if (0 <= u && u < 1 && 0 <= v && v < 1) {
+            int x = static_cast<int>(u * width);
+            int y = static_cast<int>(v * height);
+            if (x >= 0 && x < width && y >= 0 && y < height) {
+                return pixels[y][x];
+            }
+            else {
+                return { 0 , 0 ,0 };
+            }
+
+            
+        }
+        else {
+            return std::vector<float>{0.0f, 0.0f, 0.0f};
+        }
+    }
+    bool IsValid() {
+        return isValid;
+    }
+};
 class ObjParser {
 public:
-    ObjParser(const std::string& filename, const std::vector<float>& transformobj, const std::vector<float>& scaleobj, const std::vector<float>& rotationobj) {
+    std::vector<std::vector<float>> vertices;
+    std::vector<std::vector<float>> textcoords;
+    std::vector<std::vector<float>> normals;
+    std::vector<std::vector<std::vector<float>>> faces;
+    std::vector<float> transform;
+    std::vector<float> scale;
+    std::vector<float> rotation;
+    Texture texture;
+
+
+    ObjParser(const std::string& filename, const std::vector<float>& transformobj, const std::vector<float>& scaleobj, const std::vector<float>& rotationobj , std::string texturefilename = "") {
+        if (texturefilename != "") {
+            texture = Texture(texturefilename);
+        }
+        
         std::ifstream file(filename);
         if (!file.is_open()) {
             throw std::runtime_error("Failed to open file");
@@ -80,3 +154,7 @@ public:
     std::vector<float> scale;
     std::vector<float> rotation;
 };
+
+
+
+
