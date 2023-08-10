@@ -1,22 +1,54 @@
+from gl import Renderer
 import shaders
-from gl import Renderer, V2, color
 
-width = 4000
-height = 4000
+# El tamaño del FrameBuffer
+width = 1000
+height = 1000
 
-rend = Renderer(width,height)
+# Se crea el renderizador
+rend = Renderer(width, height)
 
+# Le damos los shaders que se utilizarás
 rend.vertexShader = shaders.vertexShader
 rend.fragmentShader = shaders.fragmentShader
 
-rend.glLoadModel(filename="Yanfei.obj",textureName="Yanfei.bmp",translate=(800,height/2,0),rotate=(0,190,0),scale=(6000,6000,6000))
-rend.glLoadModel(filename="Yanfei.obj",textureName="Yanfei.bmp",translate=(800,800,0),rotate=(45,90,0),scale=(6000,6000,6000))
-rend.glLoadModel(filename="Yanfei.obj",textureName="Yanfei.bmp",translate=(width - 800,height/2,0),rotate=(0,0,0),scale=(6000,6000,6000))
-rend.glLoadModel(filename="Yanfei.obj",textureName="Yanfei.bmp",translate=(width - 800,height/2- 200,0),rotate=(0,90,190),scale=(6000,6000,6000))
+rend.glLookAt(camPos=(0,0,0),eyePos=(0,0,-1))
+rend.glLoadModel(filename="Yanfei.obj",textureName="Yanfei.bmp",translate=(0,-1.5,-3),rotate=(0,45,0),scale=(10,10,10))
+# Se renderiza la escena
 rend.glRender()
 
-#triangle = [(100,100),(450,180),(250,500)]
+# Se crea el FrameBuffer con la escena renderizada
+rend.glFinish("medium.bmp")
 
-#rend.glTriangle_bc(triangle[0],triangle[1],triangle[2])
+rend.glClearColor(0, 0, 0)
+rend.glClear()
+rend.objects = []
 
-rend.glFinish("output.bmp")
+rend.glLookAt(camPos=(0,-1,0),eyePos=(0,0,-1))
+rend.glLoadModel(filename="Yanfei.obj",textureName="Yanfei.bmp",translate=(0,-1.5,-3),rotate=(0,45,0),scale=(10,10,10))
+# Se renderiza la escena
+rend.glRender()
+
+# Se crea el FrameBuffer con la escena renderizada
+rend.glFinish("low.bmp")
+
+rend.glClearColor(0, 0, 0)
+rend.glClear()
+rend.objects = []
+
+rend.glLookAt(camPos=(0,5,0),eyePos=(0,0,-4))
+rend.glLoadModel(filename="Yanfei.obj",textureName="Yanfei.bmp",translate=(0,-1.5,-3),rotate=(0,45,0),scale=(10,10,10))
+# Se renderiza la escena
+rend.glRender()
+
+# Se crea el FrameBuffer con la escena renderizada
+rend.glFinish("high.bmp")
+
+rend.glClearColor(0, 0, 0)
+rend.glClear()
+rend.objects = []
+
+rend.glLookAt(camPos=(0,0,0),eyePos=(0,0,-1))
+rend.glLoadModel(filename="Yanfei.obj",textureName="Yanfei.bmp",translate=(0,-1.5,-3),rotate=(0,45,0),scale=(10,10,10))
+rend.glRender()
+rend.glFinish("dutch.bmp")
