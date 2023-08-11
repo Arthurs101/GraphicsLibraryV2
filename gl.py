@@ -2,7 +2,7 @@ import ml
 from math import pi, sin, cos, tan
 from obj import Obj
 from texture import Texture
-from ml import barycentricCoords
+from ml import *
 import struct
 
 def char(c):
@@ -59,6 +59,7 @@ class Renderer(object):
 
         self.vertexShader = None
         self.fragmentShader = None
+        self.experimentalShader = None
 
         self.primitiveType = TRIANGLES
 
@@ -134,10 +135,10 @@ class Renderer(object):
 
                             # Si contamos un Fragment Shader, obtener el color de ahí.
                             # Sino, usar el color preestablecido.
-                            if self.fragmentShader != None:
+                            if self.experimentalShader != None:
                                 # Mandar los parámetros necesarios al shader
-                                colorP = self.fragmentShader(texCoords=uvs,
-                                                             texture=self.activeTexture)
+                                colorP = self.experimentalShader(texCoords=uvs,
+                                                             texture=self.activeTexture , lightCoords=(0,0,0),A=A,B=B,C=C)
 
                                 self.glPoint(x, y, color(colorP[0], colorP[1], colorP[2]))
 

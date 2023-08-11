@@ -107,7 +107,6 @@ def matriz_inversa(matriz):
     inversa = [[adjunta[i][j] / det for j in range(len(adjunta))] for i in range(len(adjunta))]
     return inversa
 
-
 def producto_cruz(vector1, vector2):
     if len(vector1) != 3 or len(vector2) != 3:
         raise ValueError("Los vectores deben tener tres componentes.")
@@ -121,7 +120,6 @@ def producto_cruz(vector1, vector2):
 
     return (producto_cruz_x, producto_cruz_y, producto_cruz_z)
 
-
 def subtract_arrays(array1, array2):
     if len(array1) != len(array2):
         raise ValueError("Los arrays deben tener la misma longitud.")
@@ -131,7 +129,6 @@ def subtract_arrays(array1, array2):
         result.append(array1[i] - array2[i])
 
     return tuple(result)
-
 
 def calcular_norma(vector):
     suma_cuadrados = sum(componente ** 2 for componente in vector)
@@ -146,4 +143,22 @@ def normalizar_vector(vector):
     vector_normalizado = [componente/norma for componente in vector]
 
     return tuple(vector_normalizado)
+
+def dot_product(vector1, vector2): #producto punto
+    if len(vector1) != len(vector2):
+        raise ValueError("Los vectores deben tener la misma longitud.")
+
+    result = sum(component1 * component2 for component1, component2 in zip(vector1, vector2))
+    return result
+
+def calculate_face_normal(A, B, C): #calcula la normal de la cara en un espacio 3d a partir de los puntos
+    AB = subtract_arrays(B, A)
+    AC = subtract_arrays(C, A)
+    cross_product = (
+        AB[1] * AC[2] - AB[2] * AC[1],
+        AB[2] * AC[0] - AB[0] * AC[2],
+        AB[0] * AC[1] - AB[1] * AC[0]
+    )
+    return normalizar_vector(cross_product)
+
 

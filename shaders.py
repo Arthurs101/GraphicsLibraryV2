@@ -1,5 +1,5 @@
 import random
-import ml
+from ml import *
 
 def vertexShader(vertex, **kwargs):
     # El Vertex Shader se lleva a cabo por cada vértice
@@ -35,4 +35,23 @@ def fragmentShader(**kwargs):
     else:
         color = (1, 1, 1)
 
+    return color
+
+
+def experimentalShader(**kwargs): #shader para pintado de pixel en escala blanco y negro
+    texCoords = kwargs["texCoords"]
+    texture = kwargs["texture"]
+    lightCoords = kwargs["lightCoords"]
+    A = kwargs["A"]
+    B = kwargs["B"]
+    C = kwargs["C"]
+    normal = calculate_face_normal(A, B, C)
+    intensity = dot_product(normal , lightCoords)
+    intensity = max(intensity,0.0) # garantizara siempre que sea mayor a 0
+
+    if texture != None:
+        _color = texture.getColor(texCoords[0], texCoords[1])
+        color = (_color[0] * intensity , _color[1] * intensity , _color[2] * intensity )
+    else:
+        color = (0, 0, 0)
     return color
